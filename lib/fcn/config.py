@@ -1,8 +1,11 @@
-# Copyright (c) 2020 NVIDIA Corporation. All rights reserved.
-# This work is licensed under the NVIDIA Source Code License - Non-commercial. Full
-# text can be found in LICENSE.md
+# --------------------------------------------------------
+# PoseCNN
+# Copyright (c) 2016
+# Licensed under The MIT License [see LICENSE for details]
+# Written by Yu Xiang
+# --------------------------------------------------------
 
-"""PoseCNN config system.
+"""FCN config system.
 
 This file specifies default config options for Fast R-CNN. You should not
 change values in this file. Instead, you should write a config file (in yaml)
@@ -20,6 +23,8 @@ import math
 # `pip install easydict` if you don't have it
 from easydict import EasyDict as edict
 import logging
+from yaml import Loader
+
 
 __C = edict()
 # Consumers can get config by:
@@ -330,6 +335,7 @@ __C.EXP_DIR = 'default'
 __C.GPU_ID = 0
 
 
+
 def get_output_dir(imdb, net):
     """Return the directory where experimental artifacts are placed.
 
@@ -374,7 +380,7 @@ def cfg_from_file(filename):
     """Load a config file and merge it into the default options."""
     import yaml
     with open(filename, 'r') as f:
-        yaml_cfg = edict(yaml.load(f))
+        yaml_cfg = edict(yaml.load(f, Loader=Loader))
 
     _merge_a_into_b(yaml_cfg, __C)
 
@@ -383,5 +389,5 @@ def yaml_from_file(filename):
     """Load a config file and merge it into the default options."""
     import yaml
     with open(filename, 'r') as f:
-        yaml_cfg = edict(yaml.load(f))
+        yaml_cfg = edict(yaml.load(f, Loader=Loader))
     return yaml_cfg
