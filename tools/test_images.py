@@ -180,6 +180,7 @@ if __name__ == '__main__':
         model_mesh_paths = [dataset.model_mesh_paths[i-1] for i in cfg.TEST.CLASSES[1:]]
         model_texture_paths = [dataset.model_texture_paths[i-1] for i in cfg.TEST.CLASSES[1:]]
         model_colors = [dataset.model_colors[i-1] for i in cfg.TEST.CLASSES[1:]]
+        print(model_mesh_paths)
         cfg.renderer.load_objects(model_mesh_paths, model_texture_paths, model_colors)
     cfg.renderer.set_camera_default()
     print(dataset.model_mesh_paths)

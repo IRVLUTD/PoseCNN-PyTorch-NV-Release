@@ -20,9 +20,9 @@ layout (location = 4) out vec4 PCColour;
 uniform vec3 light_position;  // in world coordinate
 uniform vec3 light_color; // light color
 void main() {
-    if (inverse_normal > 0) discard; // discard the wrong pixel
+    // if (inverse_normal > 0) discard; // discard the wrong pixel
     vec3 norm = normalize(Normal);
-    vec3 ambient =  mat_ambient * light_color;
+    vec3 ambient =  mat_ambient * light_color; //  + vec3(0.2,0.2,0.2) add some ambient light
     vec3 lightDir = normalize(light_position - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * light_color * mat_diffuse;
@@ -30,7 +30,7 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat_shininess);
     vec3 specular = light_color * (spec * mat_specular);     
-    outputColour =  vec4(ambient + diffuse + specular, 1);
+    outputColour =    vec4(ambient + diffuse + specular, 1);
 
     //NormalColour =  vec4((Normal_cam + 1) / 2,1);
     NormalColour = vec4(Normal_cam,1);

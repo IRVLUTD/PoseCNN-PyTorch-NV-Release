@@ -26,7 +26,7 @@ void main() {
     //vec3 lightDir = normalize(light_position - FragPos);
     //float diff = max(dot(Normal, lightDir), 0.0);
     //vec3 diffuse = diff * light_color;
-    if (inverse_normal > 0) discard; // discard the wrong pixel
+    // if (inverse_normal > 0) discard; // discard the wrong pixel
     vec3 norm = normalize(Normal);
     vec3 ambient =  mat_ambient * light_color;
     vec3 lightDir = normalize(light_position - FragPos);

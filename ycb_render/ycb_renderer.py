@@ -1,12 +1,6 @@
-# Copyright (c) 2020 NVIDIA Corporation. All rights reserved.
-# This work is licensed under the NVIDIA Source Code License - Non-commercial. Full
-# text can be found in LICENSE.md
-
 import sys
 import ctypes
-import torch
 import time
-import argparse
 from pprint import pprint
 from PIL import Image
 import glutils.glcontext as glcontext
@@ -32,6 +26,7 @@ except:
 
 MAX_NUM_OBJECTS = 3
 from glutils.utils import colormap
+import torch
 
 
 def loadTexture(path):
@@ -61,7 +56,7 @@ def loadTexture(path):
 
 
 class YCBRenderer:
-    def __init__(self, width=512, height=512, gpu_id=0, render_marker=False, robot=''):
+    def __init__(self, width=512, height=512, gpu_id=0, render_marker=False, robot='panda_arm'):
         self.render_marker = render_marker
         self.VAOs = []
         self.VBOs = []
@@ -80,10 +75,10 @@ class YCBRenderer:
         self.instances = []
         self.extents = []
         self.robot = robot
-        if len(self.robot) > 3:
-            self._offset_map = self.load_offset()
-        else:
-            self._offset_map = None
+        # if len(self.robot) > 3:
+        #    self._offset_map = self.load_offset()
+        #else:
+        self._offset_map = None
 
         self.r = CppYCBRenderer.CppYCBRenderer(width, height, get_available_devices()[gpu_id])
         self.r.init()
@@ -364,6 +359,7 @@ class YCBRenderer:
                 mat_diffuse = np.array(mat.properties['diffuse'])[:3] 
                 mat_specular = np.array(mat.properties['specular'])[:3] 
                 mat_ambient = np.array(mat.properties['ambient'])[:3] #phong shader
+                
                 if 'shininess' in mat.properties:
                     mat_shininess = max(mat.properties['shininess'], 1) #avoid the 0 shininess
                 else:
@@ -810,36 +806,16 @@ class YCBRenderer:
 
 camera_extrinsics=np.array([[-0.211719, 0.97654, -0.0393032, 0.377451],[0.166697, -0.00354316, -0.986002, 0.374476],[-0.96301, -0.215307, -0.162036, 1.87315],[0,0, 0, 1]])
 
-
-
-def parse_args():
-    """
-    Parse input arguments
-    """
-    parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
-    parser.add_argument('--model_path', dest='model_path',
-                        help='path of the ycb models',
-                        default='../data', type=str)
-    parser.add_argument('--robot_name', dest='robot_name',
-                        help='robot name',
-                        default='', type=str)
-    args = parser.parse_args()
-    return args
-
-
-
 if __name__ == '__main__':
-
-    args = parse_args()
-    model_path = args.model_path
-    robot_name = args.robot_name
-    width = 640
-    height = 480
+    # from robotPose.robot_pykdl import *
+    model_path = sys.argv[1]
+    robot_name = sys.argv[2]
+    print('robot name', robot_name)
+    width = 640 #800
+    height = 480 #600
 
     renderer = YCBRenderer(width=width, height=height, render_marker=True, robot=robot_name)
     if robot_name == 'baxter':
-        from robotPose.robot_pykdl import *
-        print('robot name', robot_name)
         models = ['S0', 'S1', 'E0', 'E1', 'W0', 'W1', 'W2']
         #models = ['E1']
         obj_paths = [
@@ -848,8 +824,6 @@ if __name__ == '__main__':
             [0.1*(idx+1),0,0] for idx in range(len(models))]
         texture_paths = ['' for item in models]
     elif robot_name == 'panda_arm':
-        from robotPose.robot_pykdl import *
-        print('robot name', robot_name)
         models = ['link1', 'link2', 'link3', 'link4', 'link5', 'link6', 'link7', 'hand', 'finger', 'finger']
         #models = ['link4']
         obj_paths = [
@@ -858,6 +832,15 @@ if __name__ == '__main__':
             [0,0.1*(idx+1),0] for idx in range(len(models))]
         texture_paths = ['' for item in models]
     else:
+        '''    
+        models = ['02876657/3dbd66422997d234b811ffed11682339', '02946921/4a6ba57aa2b47dfade1831cbcbd278d4',
+                  '02880940/8bb057d18e2fcc4779368d1198f406e7']
+        colors = [[0.9, 0, 0], [0.6, 0, 0], [0.3, 0, 0]]
+        obj_paths = ['{}/models_selected/{}/model.obj'.format(model_path, item) for item in models]
+        texture_paths = ['' for item in models]
+        '''
+
+
         models = ["003_cracker_box", "002_master_chef_can", "011_banana"]
         colors = [[0.9, 0, 0], [0.6, 0, 0], [0.3, 0, 0]]
 
@@ -865,6 +848,7 @@ if __name__ == '__main__':
             '{}/models/{}/textured_simple.obj'.format(model_path, item) for item in models]
         texture_paths = [
             '{}/models/{}/texture_map.png'.format(model_path, item) for item in models]
+
 
     print(obj_paths)
     renderer.load_objects(obj_paths, texture_paths, colors)

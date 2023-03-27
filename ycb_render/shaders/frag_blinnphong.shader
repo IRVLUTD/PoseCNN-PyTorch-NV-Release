@@ -40,7 +40,7 @@ void main() {
         scalar = 1.0/scalar;
 
     vec3 norm = normalize(Normal);
-    vec3 ambient =  mat_ambient * light_color;
+    vec3 ambient =  mat_ambient * light_color; //  + vec3(0.2, 0.2, 0.2)
     vec3 lightDir = normalize(light_position - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * light_color * mat_diffuse;
@@ -52,25 +52,7 @@ void main() {
     // gamma correction
     vec3 linearColour =  ambient + scalar*(diffuse +  specular);
     vec3 gamma = vec3(1.0/2.2);
-    outputColour =  texColor * vec4(pow(linearColour, gamma), 1);
-    
-    // add few more lights
-    // lightDir = normalize(world_light_pos1 - FragPos);
-    // diff = max(dot(norm, lightDir), 0.0);
-    // diffuse = diff * light_color * mat_diffuse;
-    // viewDir = normalize(Pos_cam - FragPos);
-    // reflectDir = reflect(-lightDir, norm);  
-    // spec = pow(max(dot(viewDir, reflectDir), 0.0), mat_shininess);
-    // specular = light_color * (spec * mat_specular);              
-    // outputColour +=  texture(texUnit, theCoords)  * vec4(diffuse + ambient + specular, 1);
-    // lightDir = normalize(world_light_pos2 - FragPos);
-    // diff = max(dot(norm, lightDir), 0.0);
-    // diffuse = diff * light_color * mat_diffuse;
-    // viewDir = normalize(Pos_cam - FragPos);
-    // reflectDir = reflect(-lightDir, norm);  
-    // spec = pow(max(dot(viewDir, reflectDir), 0.0), mat_shininess);
-    // specular = light_color * (spec * mat_specular);              
-    // outputColour +=  texture(texUnit, theCoords)  * vec4(ambient + scalar*(diffuse +  specular), 1);
+    outputColour = texColor * vec4(pow(linearColour, gamma), 1);
 
     //NormalColour =  vec4((Normal_cam + 1) / 2,1);
     NormalColour = vec4(Normal_cam,1);
