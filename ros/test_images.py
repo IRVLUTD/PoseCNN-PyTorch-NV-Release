@@ -41,8 +41,13 @@ from geometry_msgs.msg import PoseStamped
 from ycb_renderer import YCBRenderer
 from utils.se3 import *
 from utils.nms import *
-from Queue import Queue
 from sdf.sdf_optimizer import sdf_optimizer
+
+try:
+   import Queue as queue
+except ImportError:
+   import queue
+
 
 lock = threading.Lock()
 
@@ -92,6 +97,11 @@ class ImageListener:
             rgb_sub = message_filters.Subscriber('/rgb/image_raw', Image, queue_size=10)
             depth_sub = message_filters.Subscriber('/depth_to_rgb/image_raw', Image, queue_size=10)
             msg = rospy.wait_for_message('/rgb/camera_info', CameraInfo)
+            self.base_frame = 'rgb_camera_link'
+        elif cfg.TEST.ROS_CAMERA == 'Fetch':
+            rgb_sub = message_filters.Subscriber('/head_camera/rgb/image_raw', Image, queue_size=10)
+            depth_sub = message_filters.Subscriber('/head_camera/depth_registered/image_raw', Image, queue_size=10)
+            msg = rospy.wait_for_message('/head_camera/rgb/camera_info', CameraInfo)
             self.base_frame = 'rgb_camera_link'
         else:
             # use kinect
@@ -325,6 +335,6 @@ if __name__ == '__main__':
     # image listener
     network.eval()
     listener = ImageListener(network, dataset)
-
+    print("Going to run the listener using the network------------------------")
     while not rospy.is_shutdown():       
        listener.run_network()
