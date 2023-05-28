@@ -102,7 +102,7 @@ class ImageListener:
             rgb_sub = message_filters.Subscriber('/head_camera/rgb/image_raw', Image, queue_size=10)
             depth_sub = message_filters.Subscriber('/head_camera/depth_registered/image_raw', Image, queue_size=10)
             msg = rospy.wait_for_message('/head_camera/rgb/camera_info', CameraInfo)
-            self.base_frame = 'rgb_camera_link'
+            self.base_frame = 'head_camera_rgb_optical_frame'
         else:
             # use kinect
             rgb_sub = message_filters.Subscriber('/%s/rgb/image_color' % (cfg.TEST.ROS_CAMERA), Image, queue_size=2)
