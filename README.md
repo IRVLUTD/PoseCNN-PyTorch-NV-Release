@@ -162,6 +162,21 @@ Use python3. If ROS is needed, compile with python2.
 
     ```
 
+
+### Running with ROS with Fetch Robot Camera for real-world pose estimation
+
+```Shell
+# start rviz
+rosrun rviz rviz -d ./ros/posecnn.rviz
+
+# run posecnn for detection only (20 objects), $GPU_ID can be 0, 1, etc.
+./experiments/scripts/ros_ycb_object_test_detection_fetch.sh $GPU_ID
+
+# run full posecnn (20 objects), $GPU_ID can be 0, 1, etc.
+./experiments/scripts/ros_ycb_object_test_fetch.sh $GPU_ID
+```
+
+
 ### Running with ROS on a Realsense Camera for real-world pose estimation
 
 - Python2 is needed for ROS.
