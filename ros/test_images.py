@@ -30,6 +30,7 @@ import networks
 
 from fcn.test_imageset import test_image
 from cv_bridge import CvBridge, CvBridgeError
+import ros_numpy
 from fcn.config import cfg, cfg_from_file, get_output_dir
 from datasets.factory import get_dataset
 from std_msgs.msg import String
@@ -74,6 +75,7 @@ class ImageListener:
         rospy.init_node("posecnn_rgb")
         self.br = tf.TransformBroadcaster()
         self.label_pub = rospy.Publisher('posecnn_label' + fusion_type + suffix, Image, queue_size=10)
+        self.mask_pub = rospy.Publisher('posecnn_mask' + fusion_type + suffix, Image, queue_size=10)
         self.pose_pub = rospy.Publisher('posecnn_pose' + fusion_type + suffix, Image, queue_size=10)
         self.pose_refined_pub = rospy.Publisher('posecnn_pose_refined' + fusion_type + suffix, Image, queue_size=10)
 
@@ -123,9 +125,9 @@ class ImageListener:
     def callback_rgbd(self, rgb, depth):
 
         if depth.encoding == '32FC1':
-            depth_cv = self.cv_bridge.imgmsg_to_cv2(depth)
+            depth_cv = ros_numpy.numpify(depth)
         elif depth.encoding == '16UC1':
-            depth_cv = self.cv_bridge.imgmsg_to_cv2(depth).copy().astype(np.float32)
+            depth_cv = ros_numpy.numpify(depth).copy().astype(np.float32)
             depth_cv /= 1000.0
         else:
             rospy.logerr_throttle(
@@ -133,7 +135,7 @@ class ImageListener:
                     depth.encoding))
             return
 
-        im = self.cv_bridge.imgmsg_to_cv2(rgb, 'bgr8')
+        im = ros_numpy.numpify(rgb)
 
         with lock:
             self.im = im.copy()
@@ -160,6 +162,13 @@ class ImageListener:
         label_msg.header.frame_id = rgb_frame_id
         label_msg.encoding = 'rgb8'
         self.label_pub.publish(label_msg)
+
+        # publish label image
+        mask_msg = self.cv_bridge.cv2_to_imgmsg(labels.astype(np.uint8))
+        mask_msg.header.stamp = rospy.Time.now()
+        mask_msg.header.frame_id = rgb_frame_id
+        mask_msg.encoding = "mono8"
+        self.mask_pub.publish(mask_msg)        
 
         # publish pose image
         pose_msg = self.cv_bridge.cv2_to_imgmsg(im_pose)
